@@ -95,6 +95,63 @@ class TestProductRoutes(TestCase):
     ############################################################
     #  T E S T   C A S E S
     ############################################################
+    def test_get_product(self):
+        """It should Read a Product"""
+        product = self._create_products(1)[0]  # Create a product
+        response = self.client.get(f"{BASE_URL}/{product.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.get_json()
+        self.assertEqual(data["id"], product.id)
+        self.assertEqual(data["name"], product.name)
+        def test_get_product(self):
+        """It should Get a single Product"""
+        # get the id of a product
+        test_product = self._create_products(1)[0]
+        response = self.client.get(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["name"], test_product.name)
+        
+    def test_get_product_not_found(self):
+        """It should return 404 for a non-existent product"""
+        response = self.client.get(f"{BASE_URL}/9999")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_product(self):
+        """It should Update an Existing Product"""
+        product = self._create_products(1)[0]
+        update_data = product.serialize()
+        update_data["name"] = "Updated Product Name"
+
+        response = self.client.put(f"{BASE_URL}/{product.id}", json=update_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_product = response.get_json()
+        self.assertEqual(updated_product["name"], "Updated Product Name")
+
+    def test_update_product_not_found(self):
+        """It should return 404 when updating a non-existent product"""
+        update_data = {"name": "Non-existent"}
+        response = self.client.put(f"{BASE_URL}/9999", json=update_data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_delete_product(self):
+        """It should Delete a Product"""
+        product = self._create_products(1)[0]
+
+        response = self.client.delete(f"{BASE_URL}/{product.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Verify it's deleted
+        response = self.client.get(f"{BASE_URL}/{product.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_delete_product_not_found(self):
+        """It should return 404 when deleting a non-existent product"""
+        response = self.client.delete(f"{BASE_URL}/9999")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_index(self):
         """It should return the index page"""
         response = self.client.get("/")
